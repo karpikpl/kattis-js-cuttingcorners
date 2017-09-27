@@ -13,7 +13,7 @@ function solution(toPrint, toRead) {
 
         if (n === 0)
             break;
-        let name = 65;
+        let name = 65; // 'A'
 
         const shape = input.map((val, index) => {
 
@@ -34,10 +34,66 @@ function solution(toPrint, toRead) {
             val.angle = getP2Angle(shape[p1Index], val, shape[p3Index]);
         });
 
-        log(shape);
+        while (true) {
+
+            // finish when we have a triangle
+            if (shape.length === 3)
+                break;
+
+            // first find min
+            let minIndex = -1;
+            let minAngle = 360;
+
+            shape.forEach((val, index) => {
+
+                if (val.angle < minAngle) {
+                    minAngle = val.angle;
+                    minIndex = index;
+                }
+            });
+
+            // now try removing min angle
+            shape[minIndex].isDeleted = true;
+            //log(`Removing ${minIndex} - total is ${shape.length}`);
+
+            // need to recalculate left and right one
+            const leftIndex = getLeftNeighbourIndex(shape, minIndex);
+            const rightIndex = getRightNeighbourIndex(shape, minIndex);
+
+            //log(`calculating angle for ${leftIndex} using ${getLeftNeighbourIndex(shape, leftIndex)} and ${rightIndex}`);
+            shape[leftIndex].angle = getP2Angle(shape[getLeftNeighbourIndex(shape, leftIndex)], shape[leftIndex], shape[rightIndex]);
+            //log(`calculating angle for ${rightIndex} using ${leftIndex} and ${getRightNeighbourIndex(shape, rightIndex)}`);
+            shape[rightIndex].angle = getP2Angle(shape[leftIndex], shape[rightIndex], shape[getRightNeighbourIndex(shape, rightIndex)]);
+
+            if (shape[leftIndex].angle <= minAngle || shape[rightIndex].angle <= minAngle)
+                break;
+
+            shape.splice(minIndex, 1);
+        }
+
+        const answer = shape.reduce((acc, cur) => {
+            return acc + ' ' + cur.x + ' ' + cur.y;
+        }, shape.length);
+
+        print(answer);
     }
 
     log(`Solved ALL in ${new Date() - startAll}`);
+}
+
+function getLeftNeighbourIndex(shape, index) {
+
+    return index - 1 < 0 ? shape.length - 1 : index - 1;
+}
+
+function getRightNeighbourIndex(shape, index) {
+
+    return index + 1 > shape.length - 1 ? 0 : index + 1;
+}
+
+function getAngle(shape, p1Index, p2Index, p3Index) {
+
+    shape[p2Index].angle = getP2Angle(shape[p1Index], shape[p2Index], shape[p3Index]);
 }
 
 // run solution without any params for kattis
