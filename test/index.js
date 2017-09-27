@@ -14,34 +14,21 @@ function testSolution(input) {
     return result;
 }
 
-describe('Solution', function() {
+describe('Solution', function () {
 
-    describe('program', function() {
+    describe('program', function () {
 
         [
             {
-                input: ['6 6'],
-                result: [7]
-            }, {
-                input: ['6 4'],
-                result: ['5', '6', '7']
-            }, {
-                input: ['12 20'],
-                result: [
-                    '13',
-                    '14',
-                    '15',
-                    '16',
-                    '17',
-                    '18',
-                    '19',
-                    '20',
-                    '21'
-                ]
+                input: ['5 0 3 4 7 7 6 10 1 4 0',
+                        '5 0 0 3 5 6 7 9 8 6 0',
+                        '0'],
+                result: ['4 0 3 4 7 7 6 4 0',
+                         '3 0 0 3 5 6 0']
             }
         ].forEach((testCase) => {
 
-            it('should solve for ' + testCase.input, function() {
+            it('should solve for ' + testCase.input, function () {
 
                 // Arrange
                 const input = testCase.input;

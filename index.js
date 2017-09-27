@@ -5,33 +5,37 @@
 function solution(toPrint, toRead) {
 
     const startAll = new Date();
-    const input = readline().split(' ');
-    const dice1 = parseInt(input[0]);
-    const dice2 = parseInt(input[1]);
 
-    log(`Parsed input dice 1: ${dice1} dice 2: ${dice2}`);
+    while (true) {
+        // reading shapes
+        const input = readline().split(' ');
+        const n = parseInt(input[0]);
 
-    const results = {};
-    let maxProb = 0;
+        if (n === 0)
+            break;
+        let name = 65;
 
-    for (let i = 1; i <= dice1; i++)
-        for (let j = 1; j <= dice2; j++) {
-            const prob = (1 / dice1) + (1 / dice2);
-            const sum = i + j;
+        const shape = input.map((val, index) => {
 
-            results[sum] = (results[sum] || 0) + prob;
-        }
+                if (index % 2 !== 0) {
+                    return {
+                        x: val,
+                        y: input[index + 1],
+                        name: String.fromCharCode(name++)
+                    };
+                }
+            })
+            .filter(c => c);
 
-    let sums = [];
+        shape.forEach((val, index) => {
+            const p1Index = index - 1 < 0 ? shape.length - 1 : index - 1;
+            const p3Index = (index + 1) % shape.length;
 
-    Object.keys(results).forEach((o) => sums.push({prob: results[o], sum: o}));
+            val.angle = getP2Angle(shape[p1Index], val, shape[p3Index]);
+        });
 
-    sums = sums.sort((a, b) => b.prob - a.prob);
-    const max = sums[0].prob;
-
-    //log(sums);
-
-    sums.filter(s => s.prob == max).sort((a, b) => a.sum - b.sum).forEach(s => print(s.sum));
+        log(shape);
+    }
 
     log(`Solved ALL in ${new Date() - startAll}`);
 }
@@ -40,6 +44,25 @@ function solution(toPrint, toRead) {
 if (typeof process === 'undefined' || process.release.name !== 'node') {
 
     solution();
+}
+
+function getP2Angle(p1, p2, p3) {
+
+    // https://www.mathsisfun.com/algebra/trig-cosine-law.html
+    // cos(p2) = (|p1p2|^2 + \p2p3|^2 - \p1p3|^2) / 2*\p1p2||p2p3|
+    const cosP2 = (Math.pow(dist(p1, p2), 2) + Math.pow(dist(p2, p3), 2) - Math.pow(dist(p1, p3), 2)) / (2 * dist(p1, p2) * dist(p2, p3));
+
+    const acos = Math.acos(cosP2);
+
+    return toDegrees(acos);
+}
+
+function dist(p1, p2) {
+    return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+}
+
+function toDegrees(rad) {
+    return rad * 180 / Math.PI;
 }
 
 // node js internals below -----------------------------------------------------
@@ -60,7 +83,10 @@ if (typeof process !== 'undefined' && process.argv[2] === 'i') {
     const Readline = require('readline');
     const input = [];
 
-    const inputProcessor = Readline.createInterface({input: process.stdin, output: process.stdout});
+    const inputProcessor = Readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
 
     inputProcessor.on('line', (line) => {
 
@@ -98,4 +124,6 @@ function log() {
 if (typeof module !== 'undefined') {
     module.exports.solution = solution;
     module.exports.init = init;
+    module.exports.dist = dist;
+    module.exports.getP2Angle = getP2Angle;
 }
